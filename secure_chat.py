@@ -1,5 +1,5 @@
 # secure_chat.py
-from nrf24 import NRF24
+from lib_nrf24 import NRF24
 import spidev
 import time
 import threading
@@ -10,7 +10,7 @@ class SecureNRFChat:
     def __init__(self, pipe_write, pipe_read, ce_pin=22, spi_bus=0, spi_device=0):
     # -------- IMPORTS LOCAUX ----------
         import pigpio
-        from nrf24 import NRF24
+        from lib_nrf24 import NRF24
         import rsa
         import threading
         import time
