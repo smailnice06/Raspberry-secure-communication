@@ -9,7 +9,6 @@ from cryptography.hazmat.primitives import serialization, hashes
 class SecureNRFChat:
     def __init__(self, pipe_write, pipe_read, ce_pin=22, spi_bus=0, spi_device=0):
     # -------- CONFIGURATION RADIO ----------
-    import spidev
     spi = spidev.SpiDev()
     spi.open(spi_bus, spi_device)          # bus=0, device=0
     spi.max_speed_hz = 4000000             # 4 MHz
