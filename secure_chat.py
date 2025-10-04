@@ -23,9 +23,10 @@ class SecureNRFChat:
         if not pi.connected:
             raise RuntimeError("Le démon pigpiod n'est pas lancé. Démarre-le avec: sudo systemctl start pigpiod")
 
-        self.radio = NRF24(pi, ce=ce_pin)
-        self.radio.begin(spi_bus, spi_device)
+        self.radio = NRF24(pi)
+        self.radio.begin(ce_pin, 0)     # CE = GPIO22 (par défaut), CSN = 0 (SPI0)
         self.radio.set_retries(5, 15)
+        self.radio.set_payload_size(32)
         self.radio.set_channel(0x76)
         self.radio.set_data_rate(NRF24.BR_1MBPS)
         self.radio.set_pa_level(NRF24.PA_LOW)
