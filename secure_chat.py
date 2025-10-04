@@ -9,48 +9,50 @@ from cryptography.hazmat.primitives import serialization, hashes
 class SecureNRFChat:
     def __init__(self, pipe_write, pipe_read, ce_pin=22, spi_bus=0, spi_device=0):
     # -------- CONFIGURATION RADIO ----------
-    spi = spidev.SpiDev()
-    spi.open(spi_bus, spi_device)          # bus=0, device=0
-    spi.max_speed_hz = 4000000             # 4 MHz
-    self.radio = NRF24(spi, ce=ce_pin)     # CE = GPIO22 par défaut
+        import spidev
+        spi = spidev.SpiDev()
+        spi.open(spi_bus, spi_device)          # bus=0, device=0
+        spi.max_speed_hz = 4000000             # 4 MHz
+        self.radio = NRF24(spi, ce=ce_pin)     # CE = GPIO22 par défaut
 
     # Config radio
-    self.radio.setRetries(5, 15)
-    self.radio.setPayloadSize(32)
-    self.radio.setChannel(0x76)
-    self.radio.setDataRate(NRF24.BR_1MBPS)
-    self.radio.setPALevel(NRF24.PA_LOW)
-    self.radio.openWritingPipe(pipe_write)
-    self.radio.openReadingPipe(1, pipe_read)
-    self.radio.startListening()
+        self.radio.setRetries(5, 15)
+        self.radio.setPayloadSize(32)
+        self.radio.setChannel(0x76)
+        self.radio.setDataRate(NRF24.BR_1MBPS)
+        self.radio.setPALevel(NRF24.PA_LOW)
+        self.radio.openWritingPipe(pipe_write)
+        self.radio.openReadingPipe(1, pipe_read)
+        self.radio.startListening()
 
     # -------- VARIABLES ----------
-    self.seq_send = 0
-    self.ack_timeout = 0.5
-    self.key_exchange_done = False
-    self.remote_public_key = None
-    self.fragments = []
-    self.on_receive = None  # Callback pour messages reçus
+        self.seq_send = 0
+        self.ack_timeout = 0.5
+        self.key_exchange_done = False
+        self.remote_public_key = None
+        self.fragments = []
+        self.on_receive = None  # Callback pour messages reçus
 
     # -------- GENERATION CLÉS RSA ----------
-    self.private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
-    self.public_key = self.private_key.public_key()
-    self.pub_bytes = self.public_key.public_bytes(
-        encoding=serialization.Encoding.PEM,
-        format=serialization.PublicFormat.SubjectPublicKeyInfo
-    )
+        self.private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+        self.public_key = self.private_key.public_key()
+        self.pub_bytes = self.public_key.public_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo
+        )
 
     # -------- THREAD DE RECEPTION ----------
-    self.receiver_thread = threading.Thread(target=self._receive_messages, daemon=True)
-    self.receiver_thread.start()
+        self.receiver_thread = threading.Thread(target=self._receive_messages, daemon=True)
+        self.receiver_thread.start()
 
     # -------- ECHANGE DE CLÉS ----------
-    print("Envoi de ma clé publique...")
-    self._send_key_fragmented()
-    print("Clé publique envoyée, en attente de la clé de l'autre Pi...")
-    while not self.key_exchange_done:
-        time.sleep(0.1)
-    print("Clé publique distante reçue ! Chat prêt.\n")
+        print("Envoi de ma clé publique...")
+        self._send_key_fragmented()
+        print("Clé publique envoyée, en attente de la clé de l'autre Pi...")
+        while not self.key_exchange_done:
+            time.sleep(0.1)
+        print("Clé publique distante reçue ! Chat prêt.\n")
+
 
 
     # -------- FONCTIONS INTERNES ----------
