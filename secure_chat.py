@@ -25,11 +25,11 @@ class SecureNRFChat:
     # Initialisation du module NRF24L01+
     # spi_channel = 0 (correspond à CE0)
         self.radio = NRF24(self.pi, ce_pin, spi_channel=spi_device)
-        self.radio.setRetries(5, 15)
-        self.radio.setPayloadSize(32)
-        self.radio.setChannel(0x76)
-        self.radio.setDataRate(NRF24.BR_1MBPS)
-        self.radio.setPALevel(NRF24.PA_LOW)
+        self.radio.set_retries(5, 15)            # délai = 5 * 250µs, 15 tentatives max
+        self.radio.set_payload_size(32)          # taille max d’un paquet
+        self.radio.set_channel(0x76)             # canal radio (118)
+        self.radio.set_data_rate(NRF24.BR_1MBPS) # 1 Mbps (équilibre portée/stabilité)
+        self.radio.set_pa_level(NRF24.PA_LOW)    # puissance d’émission faible pour éviter interférences
         self.radio.openWritingPipe(pipe_write)
         self.radio.openReadingPipe(1, pipe_read)
         self.radio.startListening()
