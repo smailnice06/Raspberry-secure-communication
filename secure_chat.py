@@ -18,21 +18,21 @@ class SecureNRFChat:
 
     # -------- INITIALISATION RADIO ----------
     # Connexion au démon pigpio
-        self.pi = pigpio.pi()
-        if not self.pi.connected:
-            raise IOError("Erreur : pigpio daemon non démarré. Lance 'sudo pigpiod' avant d’exécuter le script.")
+        
+        pi = pigpio.pi()
+        if not pi.connected:
+            raise RuntimeError("Le démon pigpiod n'est pas lancé. Démarre-le avec: sudo systemctl start pigpiod")
 
-    # Initialisation du module NRF24L01+
-    # spi_channel = 0 (correspond à CE0)
-        self.radio = NRF24(self.pi, ce_pin, spi_channel=spi_device)
-        self.radio.set_retries(5, 15)            # délai = 5 * 250µs, 15 tentatives max
-        self.radio.set_payload_size(32)          # taille max d’un paquet
-        self.radio.set_channel(0x76)             # canal radio (118)
-        self.radio.set_data_rate(NRF24.BR_1MBPS) # 1 Mbps (équilibre portée/stabilité)
-        self.radio.set_pa_level(NRF24.PA_LOW)    # puissance d’émission faible pour éviter interférences
-        self.radio.openWritingPipe(pipe_write)
-        self.radio.openReadingPipe(1, pipe_read)
-        self.radio.startListening()
+        self.radio = NRF24(pi, ce=ce_pin)
+        self.radio.begin(spi_bus, spi_device)
+        self.radio.set_retries(5, 15)
+        self.radio.set_channel(0x76)
+        self.radio.set_data_rate(NRF24.BR_1MBPS)
+        self.radio.set_pa_level(NRF24.PA_LOW)
+        self.radio.open_writing_pipe(pipe_write)
+        self.radio.open_reading_pipe(1, pipe_read)
+        self.radio.start_listening()
+
 
     # -------- VARIABLES DE COMMUNICATION ----------
         self.seq_send = 0
