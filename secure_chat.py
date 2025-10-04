@@ -8,14 +8,23 @@ from cryptography.hazmat.primitives import serialization, hashes
 
 class SecureNRFChat:
     def __init__(self, pipe_write, pipe_read, ce_pin=22, spi_bus=0, spi_device=0):
-    # -------- CONFIGURATION RADIO ----------
-        import spidev
-        spi = spidev.SpiDev()
-        spi.open(spi_bus, spi_device)          # bus=0, device=0
-        spi.max_speed_hz = 4000000             # 4 MHz
-        self.radio = NRF24(spi, ce=ce_pin)     # CE = GPIO22 par défaut
+    # -------- IMPORTS LOCAUX ----------
+        import pigpio
+        from nrf24 import NRF24
+        import rsa
+        import threading
+        import time
+        from cryptography.hazmat.primitives import serialization
 
-    # Config radio
+    # -------- INITIALISATION RADIO ----------
+    # Connexion au démon pigpio
+        self.pi = pigpio.pi()
+        if not self.pi.connected:
+            raise IOError("Erreur : pigpio daemon non démarré. Lance 'sudo pigpiod' avant d’exécuter le script.")
+
+    # Initialisation du module NRF24L01+
+    # spi_channel = 0 (correspond à CE0)
+        self.radio = NRF24(self.pi, ce_pin, spi_channel=spi_device)
         self.radio.setRetries(5, 15)
         self.radio.setPayloadSize(32)
         self.radio.setChannel(0x76)
@@ -25,7 +34,7 @@ class SecureNRFChat:
         self.radio.openReadingPipe(1, pipe_read)
         self.radio.startListening()
 
-    # -------- VARIABLES ----------
+    # -------- VARIABLES DE COMMUNICATION ----------
         self.seq_send = 0
         self.ack_timeout = 0.5
         self.key_exchange_done = False
@@ -33,25 +42,30 @@ class SecureNRFChat:
         self.fragments = []
         self.on_receive = None  # Callback pour messages reçus
 
-    # -------- GENERATION CLÉS RSA ----------
+    # -------- GÉNÉRATION CLÉS RSA ----------
+        print("[INFO] Génération des clés RSA (cela peut prendre quelques secondes)...")
         self.private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
         self.public_key = self.private_key.public_key()
         self.pub_bytes = self.public_key.public_bytes(
             encoding=serialization.Encoding.PEM,
             format=serialization.PublicFormat.SubjectPublicKeyInfo
         )
+        print("[INFO] Clés RSA générées avec succès.")
 
-    # -------- THREAD DE RECEPTION ----------
+    # -------- THREAD DE RÉCEPTION ----------
         self.receiver_thread = threading.Thread(target=self._receive_messages, daemon=True)
         self.receiver_thread.start()
 
-    # -------- ECHANGE DE CLÉS ----------
-        print("Envoi de ma clé publique...")
+    # -------- ÉCHANGE DE CLÉS ----------
+        print("[INFO] Envoi de la clé publique locale...")
         self._send_key_fragmented()
-        print("Clé publique envoyée, en attente de la clé de l'autre Pi...")
+        print("[INFO] Clé publique envoyée, en attente de la clé distante...")
+
         while not self.key_exchange_done:
             time.sleep(0.1)
-        print("Clé publique distante reçue ! Chat prêt.\n")
+
+        print("[INFO] Clé publique distante reçue ! Communication sécurisée établie.\n")
+
 
 
 
