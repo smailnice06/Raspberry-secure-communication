@@ -1,35 +1,20 @@
-<!DOCTYPE html>
-<html lang="fr">
+<!doctype html>
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Raspberry Secure Chat</title>
-    <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; }
-        #chat-box { border: 1px solid #ccc; padding: 10px; height: 300px; overflow-y: scroll; background: #fff; }
-        .message { margin-bottom: 10px; }
-        .sender { font-weight: bold; }
-        #message-form { margin-top: 10px; }
-    </style>
+    <title>Chat nRF24L01+ Sécurisé</title>
 </head>
 <body>
-    <h1>Raspberry Secure Chat (Simulation)</h1>
-
-    <div id="chat-box">
-        {% if messages %}
-            {% for msg in messages %}
-                <div class="message">
-                    <span class="sender">{{ msg.sender }}:</span> {{ msg.text }}
-                </div>
-            {% endfor %}
-        {% else %}
-            <p>Aucun message pour le moment.</p>
-        {% endif %}
+    <h1>Chat Sécurisé nRF24L01+</h1>
+    <div id="messages" style="border:1px solid #000; padding:10px; height:300px; overflow:auto;">
+        {% for msg in messages %}
+            <div>{{ msg }}</div>
+        {% endfor %}
     </div>
-
-    <form id="message-form" method="POST" action="/send">
-        <input type="text" name="message" placeholder="Tapez un message..." required style="width: 70%;">
-        <button type="submit">Envoyer</button>
+    <form method="POST">
+        <input type="text" name="message" placeholder="Tapez votre message" style="width:80%;">
+        <input type="submit" value="Envoyer">
     </form>
 </body>
 </html>
+
 
