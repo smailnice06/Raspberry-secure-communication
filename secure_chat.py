@@ -19,20 +19,26 @@ class SecureNRFChat:
     # -------- INITIALISATION RADIO ----------
     # Connexion au démon pigpio
         
-        pi = pigpio.pi()
-        if not pi.connected:
-            raise RuntimeError("Le démon pigpiod n'est pas lancé. Démarre-le avec: sudo systemctl start pigpiod")
+        try:
+            pi = pigpio.pi()
+            if not pi.connected:
+                raise RuntimeError("Le démon pigpiod n'est pas lancé. Démarre-le avec: sudo systemctl start pigpiod")
 
-        self.radio = NRF24(pi, spidev.SpiDev())
-        self.radio.begin(ce_pin, 0)  # 0 → /dev/spidev0.0 (ou 1 pour /dev/spidev0.1)
-        self.radio.set_retries(5, 15)
-        self.radio.set_payload_size(32)
-        self.radio.set_channel(0x76)
-        self.radio.set_data_rate(NRF24.BR_1MBPS)
-        self.radio.set_pa_level(NRF24.PA_LOW)
-        self.radio.open_writing_pipe(pipe_write)
-        self.radio.open_reading_pipe(1, pipe_read)
-        self.radio.start_listening()
+            self.radio = NRF24(pi, spidev.SpiDev())
+            self.radio.begin(ce_pin, 0)
+            self.radio.set_retries(5, 15)
+            self.radio.set_payload_size(32)
+            self.radio.set_channel(0x76)
+            self.radio.set_data_rate(NRF24.BR_1MBPS)
+            self.radio.set_pa_level(NRF24.PA_LOW)
+            self.radio.open_writing_pipe(pipe_write)
+            self.radio.open_reading_pipe(1, pipe_read)
+            self.radio.start_listening()
+
+        except FileNotFoundError:
+            print("[AVERTISSEMENT] Aucun module NRF24 détecté — mode simulation activé.")
+            self.radio = None
+
 
 
 
