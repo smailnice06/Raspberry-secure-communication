@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Raspberry Secure Chat</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; }
+        #chat-box { border: 1px solid #ccc; padding: 10px; height: 300px; overflow-y: scroll; background: #fff; }
+        .message { margin-bottom: 10px; }
+        .sender { font-weight: bold; }
+        #message-form { margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Raspberry Secure Chat (Simulation)</h1>
+
+    <div id="chat-box">
+        {% if messages %}
+            {% for msg in messages %}
+                <div class="message">
+                    <span class="sender">{{ msg.sender }}:</span> {{ msg.text }}
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>Aucun message pour le moment.</p>
+        {% endif %}
+    </div>
+
+    <form id="message-form" method="POST" action="/send">
+        <input type="text" name="message" placeholder="Tapez un message..." required style="width: 70%;">
+        <button type="submit">Envoyer</button>
+    </form>
+</body>
+</html>
+
