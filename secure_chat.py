@@ -11,7 +11,7 @@ class SecureNRFChat:
     # -------- IMPORTS LOCAUX ----------
         import pigpio
         from lib_nrf24 import NRF24
-        import rsa
+        from cryptography.hazmat.primitives.asymmetric import rsa
         import threading
         import time
         from cryptography.hazmat.primitives import serialization
