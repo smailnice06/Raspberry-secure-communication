@@ -1,17 +1,112 @@
 <!doctype html>
-<html>
+<html lang="fr">
 <head>
+    <meta charset="UTF-8">
     <title>Chat nRF24L01+ Sécurisé</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #4b0082;
+            margin-bottom: 20px;
+            text-shadow: 1px 1px 2px #fff;
+        }
+
+        #messages {
+            width: 100%;
+            max-width: 600px;
+            height: 400px;
+            background: #fff;
+            border-radius: 15px;
+            padding: 15px;
+            overflow-y: auto;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        #messages div {
+            background: #e0d4ff;
+            margin-bottom: 10px;
+            padding: 10px 15px;
+            border-radius: 12px;
+            transition: transform 0.2s;
+        }
+
+        #messages div:hover {
+            transform: scale(1.02);
+        }
+
+        form {
+            display: flex;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px 15px;
+            border-radius: 25px 0 0 25px;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        input[type="submit"] {
+            padding: 12px 20px;
+            border-radius: 0 25px 25px 0;
+            border: none;
+            background: #8a2be2;
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        input[type="submit"]:hover {
+            background: #5d00b3;
+            transform: scale(1.05);
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #b19cd9;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f0f0f0;
+        }
+    </style>
 </head>
 <body>
     <h1>Chat Sécurisé nRF24L01+</h1>
-    <div id="messages" style="border:1px solid #000; padding:10px; height:300px; overflow:auto;">
+    <div id="messages">
         {% for msg in messages %}
             <div>{{ msg }}</div>
         {% endfor %}
     </div>
     <form method="POST">
-        <input type="text" name="message" placeholder="Tapez votre message" style="width:80%;">
+        <input type="text" name="message" placeholder="Tape ton message...">
         <input type="submit" value="Envoyer">
     </form>
 </body>
