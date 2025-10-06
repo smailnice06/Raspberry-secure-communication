@@ -79,6 +79,9 @@ class SecureNRFChat:
 
     # -------- FONCTIONS INTERNES ----------
     def _send_key_fragmented(self):
+        if self.radio is None:
+            print("[SIMULATION] Envoi de clé publique ignoré (pas de radio).")
+            return
         max_payload = 30
         for i in range(0, len(self.pub_bytes), max_payload):
             chunk = self.pub_bytes[i:i+max_payload]
@@ -95,12 +98,18 @@ class SecureNRFChat:
             self.seq_send = (self.seq_send + 1) % 256
 
     def _send_ack(self, seq):
+        if self.radio is None:
+            print("[SIMULATION] Envoi de clé publique ignoré (pas de radio).")
+            return
         ack_packet = [seq, 0xFF] + [0]*30
         self.radio.stopListening()
         self.radio.write(ack_packet)
         self.radio.startListening()
 
     def _receive_messages(self):
+        if self.radio is None:
+            print("[SIMULATION] Envoi de clé publique ignoré (pas de radio).")
+            return
         while True:
             if self.radio.available(0):
                 received = []
@@ -151,6 +160,9 @@ class SecureNRFChat:
         ).decode('utf-8')
 
     def send(self, message: str):
+        if self.radio is None:
+            print("[SIMULATION] Envoi de clé publique ignoré (pas de radio).")
+            return
         data_bytes = self.encrypt(message)
         max_payload = 30
         packets = []
