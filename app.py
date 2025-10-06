@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template
+from flask_socketio import SocketIO, emit
 from secure_chat import SecureNRFChat
 import threading
 
@@ -12,24 +13,31 @@ chat = SecureNRFChat(pipe_write, pipe_read)
 # Liste pour stocker les messages à afficher
 messages = []
 
-# Callback pour réception depuis SecureNRFChat
+# ------------------ Serveur Flask ------------------
+app = Flask(__name__)
+socketio = SocketIO(app)
+
+@app.route("/")
+def index():
+    return render_template("chat.html", messages=messages)
+
+# Quand un client envoie un message via WebSocket
+@socketio.on("send_message")
+def handle_send_message(data):
+    text = data.get("message")
+    if text:
+        chat.send(text)
+        message = f"Moi: {text}"
+        messages.append(message)
+        emit("new_message", message, broadcast=True)  # broadcast = tous les clients
+
+# Callback de réception depuis SecureNRFChat
 def receive_callback(text):
-    messages.append(f"Autre: {text}")
+    message = f"Autre: {text}"
+    messages.append(message)
+    socketio.emit("new_message", message, broadcast=True)
 
 chat.on_receive = receive_callback
 
-# ------------------ Serveur Flask ------------------
-app = Flask(__name__)
-
-@app.route("/", methods=["GET", "POST"])
-def index():
-    if request.method == "POST":
-        text = request.form.get("message")
-        if text:
-            chat.send(text)
-            messages.append(f"Moi: {text}")
-        return redirect(url_for("index"))
-    return render_template("chat.html", messages=messages)
-
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    socketio.run(app, host="0.0.0.0", port=5000)
